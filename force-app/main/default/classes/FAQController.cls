@@ -1,17 +1,27 @@
 public with sharing class FAQController {
     public FAQController() {}
 
-    @AuraEnabled
-    public static FAQResponse.Response loadFAQ(Integer numberOfRecords, Integer pageSize){
+    @AuraEnabled(cacheable=true)
+    public static FAQResponse.Response loadFAQ(Integer pageNumber, Integer pageSize, String searchTerm){
         try{
-            List<FAQ__c> FAQList = [
-                SELECT Id, Question__c, Answer__c
+            List<FAQ__c> FAQList;
+            Integer offset = pageSize * (pageNumber - 1);
+
+            if(String.isNotBlank(searchTerm)){
+                searchTerm = '%' + searchTerm + '%';
+                FAQList = [SELECT Id, Question__c, Answer__c
                 FROM FAQ__c
-                ORDER BY Question__c ASC
+                WHERE Question__c LIKE: searchTerm
                 LIMIT: pageSize
-                OFFSET: numberOfRecords
-            ];
-    
+                OFFSET: offset];
+            }
+            else {
+                FAQList = [SELECT Id, Question__c, Answer__c
+                FROM FAQ__c
+                LIMIT: pageSize
+                OFFSET: offset];
+            }
+            
             List<FAQVO> FAQVOList = convertToFAQVO(FAQList);
 
             FAQResponse.Response response = new FAQResponse.Response(false, '', JSON.serialize(FAQVOList));

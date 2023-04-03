@@ -1,12 +1,16 @@
 <template>
     <div class="slds-theme_default container">
         <lightning-input class="small-input" type="text" placeholder="Pesquisar" onchange={handleSearch}></lightning-input>
-            <template for:each={searchResults} for:item="result">
-                <p class="slds-text-title_bold slds-p-top_medium" key={result.Id}>{result.Question}</p>
-                <lightning-formatted-rich-text class="slds-p-bottom_medium" key={result.Id} value={result.Answer}></lightning-formatted-rich-text>
+        <template if:true={faqs}>
+            <template for:each={faqs} for:item="faq">
+                <p class="slds-text-title_bold slds-p-top_medium" key={faq.Id}>{faq.Question}</p>
+                <lightning-formatted-rich-text class="slds-p-bottom_medium" key={faq.Id} value={faq.Answer}></lightning-formatted-rich-text>
             </template>
-            <div class="slds-align_absolute-center slds-m-top_large">
-                <lightning-button label="Carregar Mais" onclick={handleLoadMore}></lightning-button>
-            </div>
+            <template if:true={hasMore}>
+                <div class="slds-align_absolute-center slds-m-top_large">
+                    <lightning-button label="Carregar Mais" onclick={handleLoadMore}></lightning-button>
+                </div>
+            </template>
+        </template>
     </div>
 </template>

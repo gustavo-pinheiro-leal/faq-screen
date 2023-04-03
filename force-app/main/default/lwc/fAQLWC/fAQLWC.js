@@ -1,25 +1,21 @@
-import { LightningElement, api, track } from 'lwc';
+import { LightningElement, wire, track } from 'lwc';
 import loadFAQ from '@salesforce/apex/FAQController.loadFAQ';
 
 export default class FAQLWC extends LightningElement {
     @track faqs = [];
-    @track searchResults = [];
+    @track searchTerm = '';
+    @track pageNumber = 1;
+    @track hasMore = false;
     timer;
-    numberOfRecords = 0;
     pageSize = 2;
 
-    connectedCallback(){
-        this.loadFAQs();
+    @wire(loadFAQ, {pageNumber: '$pageNumber', pageSize: '$pageSize', searchTerm: '$searchTerm'})
+    wiredFAQ({error, data}){
+        if(data){
+            this.faqs = this.faqs.concat(JSON.parse(data.ResponseJSON));
+            this.hasMore = JSON.parse(data.ResponseJSON).length === this.pageSize;
+        }
     }
-
-    async loadFAQs(){
-        let response = await loadFAQ({numberOfRecords: this.numberOfRecords, pageSize: this.pageSize});
-        this.faqs = [...this.faqs, ...JSON.parse(response.ResponseJSON)];
-        this.searchResults = this.faqs;
-        this.numberOfRecords += JSON.parse(response.ResponseJSON).length;
-
-    }
-
 
     handleSearch(event){
         const searchTerm = event.target.value.toLowerCase();
@@ -34,23 +30,13 @@ export default class FAQLWC extends LightningElement {
     }
 
     handleLoadMore(){
-        this.loadFAQs();
+        this.pageNumber++;
     }
 
     searchItems(searchTerm){
-        this.searchResults = [];
-
-        this.searchResults = this.faqs.filter((item) => {
-            return item.Question.toLowerCase().includes(searchTerm);
-        });
-
-        if(this.searchResults.length == 0){
-            this.searchResults = this.faqs;
-        }
-    }
-
-    disconnectedCallback(){
-        clearTimeout(this.timer);
-        this.timer = null;
+        this.faqs = [];
+        this.searchTerm = searchTerm;
+        this.pageNumber = 1;
+        this.hasMore = false;
     }
 }
