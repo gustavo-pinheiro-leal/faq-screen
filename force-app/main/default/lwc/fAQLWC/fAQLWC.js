@@ -7,7 +7,7 @@ export default class FAQLWC extends LightningElement {
     @track pageNumber = 1;
     @track hasMore = false;
     timer;
-    pageSize = 2;
+    pageSize = 10;
 
     @wire(loadFAQ, {pageNumber: '$pageNumber', pageSize: '$pageSize', searchTerm: '$searchTerm'})
     wiredFAQ({error, data}){

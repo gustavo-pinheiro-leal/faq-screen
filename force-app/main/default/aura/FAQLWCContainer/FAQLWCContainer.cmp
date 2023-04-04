@@ -1,0 +1,3 @@
+<aura:component>
+    <c:fAQLWC></c:fAQLWC>
+</aura:component>
